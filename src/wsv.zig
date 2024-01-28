@@ -1,3 +1,32 @@
+pub const WHITESPACE_CHARACTERS = &u21{
+    '\t', // character tabulation
+    0x000b, // line tabulation
+    0x000c, // form feed
+    '\r', // carriage return
+    ' ', // space
+    0x0085, // next line
+    0x00a0, // no-break space
+    0x1680, // ogham space mark
+    0x2000, // en quad
+    0x2001, // em quad
+    0x2002, // en space
+    0x2003, // em space
+    0x2004, // three-per-em space
+    0x2005, // four-per-em space
+    0x2006, // six-per-em space
+    0x2007, // figure space
+    0x2008, // punctuation space
+    0x2009, // thin space
+    0x200a, // hair space
+    0x2028, // line separator
+    0x2029, // paragraph separator
+    0x202f, // narrow no-break space
+    0x205f, // medium mathematical space
+    0x3000, // ideographic space
+    // line feed is used to separate rows, not to separate values
+    // '\n',
+};
+
 const Table = union(reliabletxt.Encoding) {
     utf8: [][]?[]u8,
     utf16: [][]?[]u16,
@@ -346,8 +375,30 @@ pub const Utf8Iterator = struct {
                     '\n' => return Item.newline,
                     '"' => state = .string,
 
-                    ' ',
-                    '\t',
+                    '\t', // character tabulation
+                    0x000b, // line tabulation
+                    0x000c, // form feed
+                    '\r', // carriage return
+                    ' ', // space
+                    0x0085, // next line
+                    0x00a0, // no-break space
+                    0x1680, // ogham space mark
+                    0x2000, // en quad
+                    0x2001, // em quad
+                    0x2002, // en space
+                    0x2003, // em space
+                    0x2004, // three-per-em space
+                    0x2005, // four-per-em space
+                    0x2006, // six-per-em space
+                    0x2007, // figure space
+                    0x2008, // punctuation space
+                    0x2009, // thin space
+                    0x200a, // hair space
+                    0x2028, // line separator
+                    0x2029, // paragraph separator
+                    0x202f, // narrow no-break space
+                    0x205f, // medium mathematical space
+                    0x3000, // ideographic space
                     => value_start = this.utf8_iter.i,
 
                     '-' => state = .null,
@@ -356,10 +407,31 @@ pub const Utf8Iterator = struct {
                     else => state = .value,
                 },
                 .value => switch (codepoint) {
-                    // TODO: Add other whitespace characters
                     '\n',
-                    ' ',
-                    '\t',
+                    '\t', // character tabulation
+                    0x000b, // line tabulation
+                    0x000c, // form feed
+                    '\r', // carriage return
+                    ' ', // space
+                    0x0085, // next line
+                    0x00a0, // no-break space
+                    0x1680, // ogham space mark
+                    0x2000, // en quad
+                    0x2001, // em quad
+                    0x2002, // en space
+                    0x2003, // em space
+                    0x2004, // three-per-em space
+                    0x2005, // four-per-em space
+                    0x2006, // six-per-em space
+                    0x2007, // figure space
+                    0x2008, // punctuation space
+                    0x2009, // thin space
+                    0x200a, // hair space
+                    0x2028, // line separator
+                    0x2029, // paragraph separator
+                    0x202f, // narrow no-break space
+                    0x205f, // medium mathematical space
+                    0x3000, // ideographic space
                     => {
                         this.utf8_iter.i -= std.unicode.utf8CodepointSequenceLength(codepoint) catch unreachable;
                         return Item{ .value = this.utf8_iter.bytes[value_start..this.utf8_iter.i] };
@@ -381,11 +453,32 @@ pub const Utf8Iterator = struct {
                     '"' => state = .string,
                     '/' => state = .string_line_break_escape,
 
-                    // TODO: Add other whitespace characters
                     '\n',
                     '#',
-                    ' ',
-                    '\t',
+                    '\t', // character tabulation
+                    0x000b, // line tabulation
+                    0x000c, // form feed
+                    '\r', // carriage return
+                    ' ', // space
+                    0x0085, // next line
+                    0x00a0, // no-break space
+                    0x1680, // ogham space mark
+                    0x2000, // en quad
+                    0x2001, // em quad
+                    0x2002, // en space
+                    0x2003, // em space
+                    0x2004, // three-per-em space
+                    0x2005, // four-per-em space
+                    0x2006, // six-per-em space
+                    0x2007, // figure space
+                    0x2008, // punctuation space
+                    0x2009, // thin space
+                    0x200a, // hair space
+                    0x2028, // line separator
+                    0x2029, // paragraph separator
+                    0x202f, // narrow no-break space
+                    0x205f, // medium mathematical space
+                    0x3000, // ideographic space
                     => {
                         // we roll back here so it can be handled in the next iteration of the loop
                         this.utf8_iter.i -= std.unicode.utf8CodepointSequenceLength(codepoint) catch unreachable;
@@ -402,11 +495,32 @@ pub const Utf8Iterator = struct {
                     },
                 },
                 .null => switch (codepoint) {
-                    // TODO: Add other whitespace characters
                     '\n',
                     '#',
-                    ' ',
-                    '\t',
+                    '\t', // character tabulation
+                    0x000b, // line tabulation
+                    0x000c, // form feed
+                    '\r', // carriage return
+                    ' ', // space
+                    0x0085, // next line
+                    0x00a0, // no-break space
+                    0x1680, // ogham space mark
+                    0x2000, // en quad
+                    0x2001, // em quad
+                    0x2002, // en space
+                    0x2003, // em space
+                    0x2004, // three-per-em space
+                    0x2005, // four-per-em space
+                    0x2006, // six-per-em space
+                    0x2007, // figure space
+                    0x2008, // punctuation space
+                    0x2009, // thin space
+                    0x200a, // hair space
+                    0x2028, // line separator
+                    0x2029, // paragraph separator
+                    0x202f, // narrow no-break space
+                    0x205f, // medium mathematical space
+                    0x3000, // ideographic space
                     => {
                         // we roll back here so it can be handled in the next iteration of the loop
                         this.utf8_iter.i -= std.unicode.utf8CodepointSequenceLength(codepoint) catch unreachable;
