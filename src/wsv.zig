@@ -335,7 +335,7 @@ pub const Utf8Iterator = struct {
         null,
     };
 
-    const ParseState = enum { default, value, string, string_double_quote, string_line_break_escape, comment };
+    const ParseState = enum { default, value, string, string_double_quote, string_line_break_escape, null, comment };
 
     pub fn next(this: *@This()) !?Item {
         var state = Utf8Iterator.ParseState.default;
@@ -349,6 +349,8 @@ pub const Utf8Iterator = struct {
                     ' ',
                     '\t',
                     => value_start = this.utf8_iter.i,
+
+                    '-' => state = .null,
 
                     '#' => state = .comment,
                     else => state = .value,
@@ -397,6 +399,21 @@ pub const Utf8Iterator = struct {
                     else => {
                         // TODO: diagnostic: invalid string line break
                         return error.InvalidStringLineBreak;
+                    },
+                },
+                .null => switch (codepoint) {
+                    // TODO: Add other whitespace characters
+                    '\n',
+                    '#',
+                    ' ',
+                    '\t',
+                    => {
+                        // we roll back here so it can be handled in the next iteration of the loop
+                        this.utf8_iter.i -= std.unicode.utf8CodepointSequenceLength(codepoint) catch unreachable;
+                        return Item.null;
+                    },
+                    else => {
+                        state = .value;
                     },
                 },
                 .comment => switch (codepoint) {
@@ -513,6 +530,17 @@ test parseIter {
             &.{ "𠀇", "U+20007", "F0_A0_80_87", "D840_DC07", "CJK Unified Ideograph-20007" },
         },
         (try parseIter(@embedFile("./testdata/Example01_Table_UTF8.txt"))).utf8,
+    );
+
+    try expectEqualUTF8TablesIter(
+        &.{
+            &.{ "Hello,", "world!" },
+            &.{ null, "!" },
+        },
+        (try parseIter("\xEF\xBB\xBF" ++
+            \\Hello, world!
+            \\- !
+        )).utf8,
     );
 }
 
