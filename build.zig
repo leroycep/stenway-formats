@@ -4,8 +4,11 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    // support both zig versions 0.12.0-dev.2063+804cee3b9 and 0.13.0
+    const root_source_file = if (@hasDecl(std.Build, "path")) b.path("src/root.zig") else .{ .path = "src/root.zig" };
+
     const module = b.addModule("stenway-formats", .{
-        .root_source_file = b.path("src/root.zig"),
+        .root_source_file = root_source_file,
         .target = target,
         .optimize = optimize,
     });
@@ -14,7 +17,7 @@ pub fn build(b: *std.Build) void {
     // Creates a step for unit testing. This only builds the test executable
     // but does not run it.
     const lib_unit_tests = b.addTest(.{
-        .root_source_file = b.path("src/root.zig"),
+        .root_source_file = root_source_file,
         .target = target,
         .optimize = optimize,
     });
