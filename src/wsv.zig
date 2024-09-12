@@ -537,7 +537,15 @@ pub const Utf8Iterator = struct {
             }
         }
 
-        return null;
+        switch (state) {
+            .default => return null,
+            .null => return Item.null,
+            .value => return Item{ .value = this.utf8_iter.bytes[value_start..this.utf8_iter.i] },
+            .string => return error.InvalidFormat,
+            .string_double_quote => return Item{ .string = this.utf8_iter.bytes[value_start..this.utf8_iter.i] },
+            .string_line_break_escape => return error.InvalidFormat,
+            .comment => return null,
+        }
     }
 };
 
@@ -616,6 +624,7 @@ fn expectEqualUTF8TablesIter(expected_table: []const []const ?[]const u8, actual
                     , .{ expected_row_index, expected_value_index, std.zig.fmtEscapes(expected_value.?) });
                     is_errors = true;
                 }
+                expected_value_index += 1;
             },
         }
     }
@@ -656,6 +665,42 @@ test parseIter {
             \\- !
         )).utf8,
     );
+}
+
+fn expectItem(expected: ?Utf8Iterator.Item, actual: ?Utf8Iterator.Item) !void {
+    if (expected == null and actual == null) return;
+    if (expected == null or actual == null) {
+        std.debug.print("values do not match: ", .{});
+        if (expected) |s| {
+            std.debug.print("{} != ", .{s});
+        } else {
+            std.debug.print("null != ", .{});
+        }
+        if (actual) |s| {
+            std.debug.print("{}\n", .{s});
+        } else {
+            std.debug.print("null\n", .{});
+        }
+        return error.ExpectedEqual;
+    }
+    try std.testing.expectEqual(std.meta.activeTag(expected.?), std.meta.activeTag(actual.?));
+    switch (expected.?) {
+        .newline, .null => {},
+        .value => |value| try std.testing.expectEqualStrings(value, actual.?.value),
+        .string => |string| try std.testing.expectEqualStrings(string, actual.?.string),
+    }
+}
+
+test "empty document" {
+    var iter = (try parseIter("\xEF\xBB\xBF")).utf8;
+    try std.testing.expectEqual(@as(?Utf8Iterator.Item, null), iter.next());
+}
+
+test "minimal document" {
+    var iter = (try parseIter("\xEF\xBB\xBFR\n-")).utf8;
+    try expectItem(.{ .value = "R" }, try iter.next());
+    try expectItem(.newline, try iter.next());
+    try expectItem(.null, try iter.next());
 }
 
 const reliabletxt = @import("./reliabletxt.zig");
